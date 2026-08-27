@@ -1,0 +1,19 @@
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { listAnalysisHistory } from '../datasetApi';
+import { colors, spacing } from '../theme';
+import type { AnalysisHistory } from '../types';
+
+const labels: Record<string, string> = { descriptive: 'Statistique descriptive', ttest: 'Test t', anova: 'ANOVA', chi_square: 'Test du Chi-deux', fisher: 'Test exact de Fisher', vif: 'Facteur VIF', breusch_pagan: 'Breusch-Pagan', ols: 'Régression OLS', logit: 'Modèle Logit', probit: 'Modèle Probit' };
+
+export function HistoryScreen() {
+  const [items, setItems] = useState<AnalysisHistory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => { listAnalysisHistory().then(setItems).catch((caught) => setError(caught instanceof Error ? caught.message : 'Historique indisponible.')).finally(() => setLoading(false)); }, []);
+  return <SafeAreaView style={styles.safe}><ScrollView contentContainerStyle={styles.content}><Text style={styles.kicker}>HISTORIQUE</Text><Text style={styles.title}>Vos analyses récentes.</Text>{loading ? <ActivityIndicator color={colors.teal} size="large" /> : error ? <Text style={styles.error}>{error}</Text> : items.length === 0 ? <View style={styles.empty}><Text style={styles.emptyTitle}>Aucune analyse enregistrée.</Text><Text style={styles.emptyText}>Vos résultats apparaîtront ici après votre première analyse.</Text></View> : items.map((item) => <View key={item.id} style={styles.item}><View style={styles.itemTop}><Text style={styles.itemType}>{labels[item.analysis_type] ?? item.analysis_type}</Text><Text style={styles.date}>{new Date(item.created_at).toLocaleDateString('fr-FR')}</Text></View><Text style={styles.dataset}>{item.dataset_name}</Text><Text style={styles.parameters}>{Object.entries(item.parameters).filter(([key]) => key !== 'dataset_id').map(([key, value]) => `${key.replaceAll('_', ' ')} : ${String(value)}`).join('  ·  ')}</Text><View style={styles.result}><Text style={styles.resultTitle}>Résultat</Text>{Object.entries(item.results).filter(([key]) => !['dataset_id', 'interpretation', 'warnings'].includes(key)).slice(0, 5).map(([key, value]) => <Text key={key} style={styles.resultLine}>{key.replaceAll('_', ' ')} : {typeof value === 'object' ? JSON.stringify(value) : String(value)}</Text>)}</View></View>)}</ScrollView></SafeAreaView>;
+}
+
+const styles = StyleSheet.create({ safe: { backgroundColor: colors.paper, flex: 1 }, content: { padding: spacing.lg }, kicker: { color: colors.coral, fontSize: 12, fontWeight: '800', letterSpacing: 1.5 }, title: { color: colors.ink, fontSize: 29, fontWeight: '800', marginBottom: spacing.xl, marginTop: spacing.sm }, error: { color: colors.danger, fontSize: 15 }, empty: { backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 10, borderWidth: 1, padding: spacing.lg }, emptyTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' }, emptyText: { color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: spacing.xs }, item: { backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 10, borderWidth: 1, marginBottom: spacing.md, padding: spacing.md }, itemTop: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }, itemType: { color: colors.teal, flex: 1, fontSize: 16, fontWeight: '800' }, date: { color: colors.muted, fontSize: 12 }, dataset: { color: colors.ink, fontSize: 14, fontWeight: '700', marginTop: spacing.sm }, parameters: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: spacing.xs }, result: { backgroundColor: colors.tealSoft, borderRadius: 8, marginTop: spacing.md, padding: spacing.sm }, resultTitle: { color: colors.ink, fontSize: 13, fontWeight: '800', marginBottom: 3 }, resultLine: { color: colors.muted, fontSize: 12, lineHeight: 18 } });

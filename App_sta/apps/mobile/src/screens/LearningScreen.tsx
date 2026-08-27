@@ -1,0 +1,18 @@
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { listLearningModules, markMethodStarted } from '../datasetApi';
+import { colors, spacing } from '../theme';
+import type { LearningModule } from '../types';
+
+export function LearningScreen() {
+  const [modules, setModules] = useState<LearningModule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => { listLearningModules().then(setModules).catch((caught) => setError(caught instanceof Error ? caught.message : 'Contenu indisponible.')).finally(() => setLoading(false)); }, []);
+  if (loading) return <SafeAreaView style={styles.safe}><ActivityIndicator color={colors.teal} size="large" /></SafeAreaView>;
+  return <SafeAreaView style={styles.safe}><ScrollView contentContainerStyle={styles.content}><Text style={styles.kicker}>PARCOURS D’APPRENTISSAGE</Text><Text style={styles.title}>Apprendre par la pratique.</Text>{error ? <Text style={styles.error}>{error}</Text> : modules.map((module) => <View key={module.id} style={styles.module}><Text style={styles.moduleTitle}>{module.name}</Text><Text style={styles.description}>{module.description}</Text>{module.methods.map((method) => <Pressable accessibilityRole="button" key={method.id} onPress={() => void markMethodStarted(method.id)} style={styles.method}><Text style={styles.methodTitle}>{method.name}</Text><Text style={styles.label}>Définition</Text><Text style={styles.body}>{method.definition}</Text><Text style={styles.label}>Formule</Text><Text style={styles.formula}>{method.formula}</Text><Text style={styles.label}>Pourquoi l’utiliser ?</Text><Text style={styles.body}>{method.utility}</Text><Text style={styles.label}>Conditions</Text>{method.conditions.map((condition) => <Text key={condition} style={styles.condition}>• {condition}</Text>)}<Text style={styles.label}>Exemple</Text><Text style={styles.body}>{method.example}</Text><Text style={styles.label}>Commandes</Text>{method.commands.map((command) => <Text key={command.software} style={styles.command}><Text style={styles.software}>{command.software} : </Text>{command.command}</Text>)}</Pressable>)}</View>)}</ScrollView></SafeAreaView>;
+}
+
+const styles = StyleSheet.create({ safe: { backgroundColor: colors.paper, flex: 1 }, content: { padding: spacing.lg }, kicker: { color: colors.coral, fontSize: 12, fontWeight: '800', letterSpacing: 1.5 }, title: { color: colors.ink, fontSize: 29, fontWeight: '800', marginBottom: spacing.xl, marginTop: spacing.sm }, error: { color: colors.danger, fontSize: 15 }, module: { marginBottom: spacing.lg }, moduleTitle: { color: colors.ink, fontSize: 23, fontWeight: '800' }, description: { color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: spacing.xs }, method: { backgroundColor: colors.surface, borderColor: colors.line, borderRadius: 10, borderWidth: 1, marginTop: spacing.md, padding: spacing.lg }, methodTitle: { color: colors.teal, fontSize: 19, fontWeight: '800', marginBottom: spacing.md }, label: { color: colors.ink, fontSize: 13, fontWeight: '800', marginTop: spacing.md }, body: { color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: spacing.xs }, formula: { backgroundColor: colors.tealSoft, color: colors.ink, fontFamily: 'monospace', fontSize: 15, marginTop: spacing.xs, padding: spacing.sm }, condition: { color: colors.muted, fontSize: 14, lineHeight: 21, marginTop: 3 }, command: { backgroundColor: colors.ink, color: colors.surface, fontFamily: 'monospace', fontSize: 13, marginTop: spacing.xs, padding: spacing.sm }, software: { color: '#9FD8D0', fontWeight: '800' } });

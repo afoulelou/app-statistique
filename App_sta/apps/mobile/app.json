@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "App Statistique",
+    "slug": "app-statistique",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.appstatistique.mobile"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-secure-store"
+    ]
+  }
+}

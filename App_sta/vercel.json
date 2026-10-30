@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm --prefix apps/mobile run build",
+  "outputDirectory": "apps/mobile/dist",
+  "cleanUrls": true
+}

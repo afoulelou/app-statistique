@@ -32,6 +32,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://app-statistique.vercel.app",
+        "https://app-statistique-git-main-afou.vercel.app",
         "http://localhost:8081",
         "http://127.0.0.1:8081",
         "http://localhost:19006",

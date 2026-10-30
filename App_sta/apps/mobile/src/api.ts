@@ -3,9 +3,9 @@ import { Platform } from 'react-native';
 import type { TokenResponse, User } from './types';
 import { tokenStorage } from './storage';
 
-const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL ?? 'http://127.0.0.1:8000';
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, '');
 const browserHost = typeof window !== 'undefined' && window.location?.hostname ? window.location.hostname : '127.0.0.1';
-const API_URL = Platform.OS === 'web' ? `http://${browserHost}:8000` : configuredApiUrl;
+const API_URL = configuredApiUrl || (Platform.OS === 'web' ? `http://${browserHost}:8000` : 'http://127.0.0.1:8000');
 const ACCESS_TOKEN_KEY = 'app-statistique.access-token';
 const REFRESH_TOKEN_KEY = 'app-statistique.refresh-token';
 const REQUEST_TIMEOUT_MS = 15000;
